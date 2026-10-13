@@ -44,8 +44,13 @@ class StaticTests(unittest.TestCase):
         self.assertEqual(s.aggregate(rows)['status'],'INCONCLUSIVE')
         rows[1]['train_orders']=['mismatched']
         with self.assertRaises(ValueError):s.aggregate(rows)
-    def test_production_disabled(self):
-        self.assertIs(read(ROOT/'activation.json')['real_execution_authorized'],False)
+    def test_explicit_v2_activation_release(self):
+        # This reviewed release proposes activation; signed run authority and the
+        # manual Environment gate remain separately mandatory before execution.
+        self.assertEqual(read(ROOT/'activation.json'),{
+            'schema':'R18B4_PUBLIC_ACTIVATION_V2',
+            'operation':'SINGLE_OPERATOR_FRESH_SEED_CONFIRMATION_V2',
+            'status':'PROSPECTIVELY_APPROVED','real_execution_authorized':True})
     def test_synthetic_has_no_real_draw_or_data_download(self):
         tree=ast.parse((ROOT/'qualify.py').read_bytes())
         names={n.id for n in ast.walk(tree) if isinstance(n,ast.Name)}
