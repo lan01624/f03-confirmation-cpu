@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import tarfile
 import os
-from transport import canonical,sha,require,regular,durable
+from transport import canonical,sha,require,regular,durable,BLOCKS,ARMS
 
 def public_key(pem):
     from cryptography.hazmat.primitives.serialization import load_pem_public_key
@@ -36,6 +36,8 @@ def seal(custody,destination,pem,provenance):
     require(not custody.is_symlink() and custody.is_dir(),'CUSTODY_DIRECTORY')
     with tarfile.open(fileobj=buffer,mode='w:gz') as archive:
         for path in sorted(custody.rglob('*')):
+            rel=path.relative_to(custody).parts
+            if len(rel)>=3 and rel[0]=='fits' and rel[1] in {b+'-'+a for b in BLOCKS for a in ARMS} and rel[2]=='scratch':continue
             require(not path.is_symlink(),'CUSTODY_SYMLINK')
             if path.is_dir():continue
             raw=regular(path);total+=len(raw);require(total<=200_000_000,'CUSTODY_SIZE')

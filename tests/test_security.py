@@ -12,6 +12,7 @@ ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from transport import *
 from crypto import *
 from authorize import validate_authority,api,claim,protections
+from recovery import binding,protocol
 
 def fixture(auth_changes=None):
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -23,12 +24,12 @@ def fixture(auth_changes=None):
         'pi_signing_sha256':fingerprint(pi.public_key()),'evaluator_signing_sha256':fingerprint(ev.public_key()),
         'evaluator_login':OWNER_LOGIN,'evaluator_id':OWNER_ID,'recipient_public_pem':pem(rsa.public_key()),'recipient_sha256':fingerprint(rsa.public_key())}
     context={'repository':REPOSITORY,'repository_id':REPOSITORY_ID,'commit':'1'*40,'run_id':123,'attempt':1,
-        'workflow':'confirmation.yml','manifest_sha256':'2'*64}
+        'workflow':'recovery.yml','manifest_sha256':'2'*64}
     identity=read(ROOT/'frozen/identity.json')
-    reservation={'schema':'R18B4_PRIVATE_DELEGATION_V1','science':identity,'public_repository_id':REPOSITORY_ID,
-        'public_commit':context['commit'],'old_marker':'refs/tags/r18b4-f03-confirmation-v1-consumed','old_marker_commit':'3'*40,
-        'private_delegation_commit':'4'*40,'status':'OLD_ROUTE_RESERVED_NO_FITS'}
-    auth={'schema':'R18B4_PUBLIC_AUTHORIZATION_V2','operation':OPERATION,'owner_id':OWNER_ID,'human_review':'OWNER_OPERATED','independent_human_review':False,'provenance':context,'science':identity,'evaluator_login':OWNER_LOGIN,
+    reservation={'schema':'R18B4_RECOVERY_RESERVATION_V1','science':identity,'public_repository_id':REPOSITORY_ID,
+        'public_commit':context['commit'],'old_marker':protocol()['recovery_private_marker'],'old_marker_commit':'3'*40,
+        'private_delegation_commit':'4'*40,'status':'RECOVERY_ROUTE_RESERVED_NO_FITS','recovery':binding(protocol()['prior_seed_manifest_sha256'])}
+    auth={'schema':'R18B4_RECOVERY_AUTHORIZATION_V1','recovery':binding(protocol()['prior_seed_manifest_sha256']),'operation':OPERATION,'owner_id':OWNER_ID,'human_review':'OWNER_OPERATED','independent_human_review':False,'provenance':context,'science':identity,'evaluator_login':OWNER_LOGIN,
         'evaluator_id':OWNER_ID,'owner_login':OWNER_LOGIN,'recipient_sha256':trust['recipient_sha256'],'reservation_sha256':sha(canonical(reservation)),
         'expires_unix':2000,'approval_digest':'5'*64,'accepts_n3_limit':True,'off_host_owner_key_attestation':True,'transport_amendment_approved':True}
     if auth_changes:auth.update(auth_changes)
@@ -67,7 +68,7 @@ class SecurityTests(unittest.TestCase):
             private=Path(d);custody=private/'custody';custody.mkdir()
             durable(custody/'authority.json',b);durable(custody/'trust.json',t)
             with patch('authorize.freeze',return_value=i),patch('authorize.hosted_context',return_value=c),\
-                 patch('authorize.validate_authority',return_value=b['authorization']),patch('authorize.protections'),\
+                 patch('authorize.validate_authority',return_value=b['authorization']),patch('authorize.protections'),patch('authorize.custody_prior'),\
                  patch.dict(os.environ,{'GITHUB_TOKEN':'synthetic-only'}),patch('authorize.api',side_effect=TimeoutError) as call:
                 with self.assertRaises(TimeoutError):claim(private)
                 with self.assertRaises(FileExistsError):claim(private)

@@ -20,14 +20,15 @@ import urllib.request
 ROOT=Path(__file__).resolve().parent
 REPOSITORY='lan01624/f03-confirmation-cpu'
 REPOSITORY_ID=1417070173
-OPERATION='SINGLE_OPERATOR_FRESH_SEED_CONFIRMATION_V2'
+OPERATION='R18B4_F03_RECOVERY_CONFIRMATION_V1'
 OWNER_LOGIN='lan01624'
 OWNER_ID=260238692
 QUALITY_LIMITATIONS={'seed_blocks':3,'paired_t_degrees_of_freedom':2,
     'conditional_normal_approximation':True,'same_validation_data':True,
     'independent_data':False,'independent_human_review':False,
     'all_class_harms_reviewed':True,'negative_results_retained':True}
-MARKER='refs/tags/r18b4-public-confirmation-v1-consumed'
+MARKER='refs/tags/r18b4-public-recovery-confirmation-v1-consumed'
+WORKFLOW='recovery.yml'
 BLOCKS=('block-01','block-02','block-03')
 ARMS=('baseline','candidate')
 EXCLUDED=frozenset((4901,4902,4903,5201,5202,5203,6101,6102,6103))

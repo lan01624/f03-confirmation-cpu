@@ -7,7 +7,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   confirmation:
-    if: github.ref == 'refs/heads/main' && github.ref_protected && github.run_attempt == 1 && github.actor == 'lan01624'
+    if: ${{ false }} # Terminal original run; permanently retired, never rerun.
     environment: r18b4-independent-evaluator
     permissions:
       contents: write

@@ -1,0 +1,75 @@
+name: Owner-operated once-only recovery confirmation V1
+on:
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: r18b4-public-recovery-confirmation-v1-once
+  cancel-in-progress: false
+jobs:
+  confirmation:
+    if: github.ref == 'refs/heads/main' && github.ref_protected && github.run_attempt == 1 && github.actor == 'lan01624'
+    environment: r18b4-independent-evaluator
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '4'
+      OPENBLAS_NUM_THREADS: '4'
+      MKL_NUM_THREADS: '4'
+    steps:
+      - name: Anonymous exact public checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REPOSITORY" == lan01624/f03-confirmation-cpu ]]
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git init .
+          git -c credential.helper= fetch --depth=1 https://github.com/lan01624/f03-confirmation-cpu.git "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - name: Prospective activation gate
+        run: |
+          python -B -c 'from transport import read,require; a=read("activation.json"); require(a["real_execution_authorized"] is True and a["status"]=="PROSPECTIVELY_APPROVED","PRODUCTION_DISABLED")'
+      - name: Separate frozen science and cryptographic runtimes
+        run: |
+          python -m venv "$RUNNER_TEMP/science"
+          "$RUNNER_TEMP/science/bin/python" -m pip install --no-deps -r frozen/runtime-lock.txt --extra-index-url https://download.pytorch.org/whl/cpu
+          python -m venv "$RUNNER_TEMP/crypto"
+          "$RUNNER_TEMP/crypto/bin/python" -m pip install --no-deps -r crypto-lock.txt
+      - name: Verify Owner-signed role authority and manual approval protection
+        env:
+          R18B4_PRIOR_SEED_MANIFEST: ${{ secrets.R18B4_PRIOR_SEED_MANIFEST }}
+          R18B4_TRUST_JSON: ${{ secrets.R18B4_TRUST_JSON }}
+          R18B4_SIGNED_AUTHORIZATION: ${{ secrets.R18B4_SIGNED_AUTHORIZATION }}
+          R18B4_REVIEWER_APPROVAL_SHA256: ${{ secrets.R18B4_REVIEWER_APPROVAL_SHA256 }}
+        run: |
+          umask 077
+          python -B -c 'import os; from pathlib import Path; Path(os.environ["RUNNER_TEMP"],"evaluator-trust.json").write_text(os.environ["R18B4_TRUST_JSON"])'
+          "$RUNNER_TEMP/crypto/bin/python" -B authorize.py prepare --private "$RUNNER_TEMP/r18b4-private" --trust "$RUNNER_TEMP/evaluator-trust.json"
+      - name: Frozen runtime, TRAIN hashes and synthetic boundary before claim
+        run: "$RUNNER_TEMP/science/bin/python -B execute.py preflight --private $RUNNER_TEMP/r18b4-private"
+      - name: Atomic public marker (only token use)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: "$RUNNER_TEMP/crypto/bin/python -B authorize.py claim --private $RUNNER_TEMP/r18b4-private"
+      - name: Exactly one six-fit batch after marker
+        run: "$RUNNER_TEMP/science/bin/python -B execute.py execute --private $RUNNER_TEMP/r18b4-private"
+      - name: Encrypt complete custody, including terminal failures
+        if: always()
+        run: |
+          if test -f "$RUNNER_TEMP/r18b4-private/custody/permit.json"; then
+            "$RUNNER_TEMP/crypto/bin/python" -B authorize.py seal --private "$RUNNER_TEMP/r18b4-private" --output "$RUNNER_TEMP/encrypted-export"
+          fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: encrypted-evaluator-custody
+          path: |
+            ${{ runner.temp }}/encrypted-export/encrypted-custody.json
+            ${{ runner.temp }}/encrypted-export/receipt.json
+          retention-days: 1
+          if-no-files-found: error
