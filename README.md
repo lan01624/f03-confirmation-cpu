@@ -1,148 +1,149 @@
-# F03 public confirmation transport V1
+# Single-operator fresh-seed confirmation V2
 
-This repository is a minimal prospective execution transport for the frozen
-`r18b4-f03-whole-patch-confirmation-v1` experiment. Production is disabled in
-`activation.json`. No actual independent confirmation is supplied by this release.
+`SINGLE_OPERATOR_FRESH_SEED_CONFIRMATION_V2` is a prospective operational amendment.
+The sole human Owner, PI-role signer and evaluator-role reviewer is **lan01624**,
+GitHub numeric user ID **260238692**. This is independent-seed replication, **not
+independent human review or third-party validation**. Distinct signing keys identify
+roles, not different humans. Production remains disabled in `activation.json`.
 
-The original baseline/candidate worker bytes, original patch, accepted two-change
-trusted entry, Landlock/seccomp boundary, CPU lock, protocol and ConfirmationSpec
-are committed under `frozen/`. Four baseline functions, four data/hash functions,
-three receipt/metric functions and two statistical/seed-validation functions are
-exact source slices with minimal import headers. No model/optimizer/forward/loss/
-order/metric implementation has been rewritten. The private source-to-public
-mapping documents every extraction. Full-file parity is claimed only for exact
-copies; the transport is a new prospective contract.
+## Scientific boundary
 
-No dataset files, Agent, source-repository Git metadata, private ledgers, historical
-action/API logs, prior outcome cards or evaluator keys are included. The frozen
-protocol itself contains a historical magnitude in its margin disclaimer; Owner
-publication review must explicitly include that exact original document.
+Every `frozen/` byte remains unchanged from the V1 public root. The original
+Source/Candidate/Patch, release, protocol and ConfirmationSpec remain fixed, along
+with three new CSPRNG seeds excluding all nine previous seeds, three paired
+baseline/candidate blocks, six CPU fits, five full epochs/3910 updates per fit,
+50000 TRAIN/10000 VALID, no official TEST, final-epoch class5/6 recall, paired t95
+df2 criterion, all class harms and negative findings. No retries, outcome-based
+seed selection, automatic VALIDATED status or LessonCard admission are permitted.
+The Owner receives raw seeds/outcomes only after the prospectively frozen batch;
+the Agent never receives them. The n=3 conditional normal approximation and same
+VALID data do not establish independent-data generalization.
 
-## Publication and synthetic qualification
+The exact baseline/candidate workers, original patch, accepted two-substitution
+trusted entry and Linux Landlock/seccomp boundary are in `frozen/`. Extracted
+baseline/decoder/measurement/statistical functions retain their original bodies.
+This transport is a versioned contract, not a claim of whole private-executor parity.
+No datasets, private source Git history, keys, ledgers or outcome cards are published.
+The frozen protocol retains its previously approved historical margin disclaimer.
 
-Owner must review the external complete publication inventory and its SHA256
-before any public push. `MANIFEST.json` commits every public file except itself;
-the external inventory includes `MANIFEST.json` and therefore closes that boundary.
-Only the exact reviewed inventory may be staged in a fresh Git repository.
+## Engineering amendment and protection
 
-Protect `main` (required PR review, no force-push or deletion, include administrators)
-before dispatch. Configure Actions to permit the pinned setup-python and artifact
-actions. Manually dispatch **synthetic.yml** on protected `main`, attempt 1. It uses
-standard `ubuntu-24.04` with Python 3.12.14 and the exact original CPU package lock
-in a fresh venv. There is no fallback package, Python, OS, sandbox or device.
+Owner review of the complete changed-file inventory precedes merge of the amendment.
+`MANIFEST.json` commits all public files except itself; the external inventory also
+hashes the manifest. The new PR workflow runs source and synthetic authorization
+regression tests only. It never invokes fitting, confirmation seeds or marker claims.
 
-The workflow uses anonymous HTTPS to fetch only this public repository. No PAT or
-repository token is passed to checkout, dependency installation, tests or fitting.
-The synthetic path does not download any dataset or generate confirmation seeds.
-The fixed engineering fixture 7101 is not a confirmation seed manifest. It runs
-four one-update, 20-TRAIN/20-VALID synthetic micro-tests: each exact worker twice.
-It checks numerical replay, paired initialization/order, recomputed metrics, and
-actual denial of private and TEST-canary files, network and child processes.
+`main` still requires a PR. Required approving human count is zero and last-push
+human approval is disabled so the sole author can merge after review. Administrator
+enforcement, no force pushes, no deletion, stale-review dismissal, linear history
+and conversation resolution remain enabled. Required status check
+`owner-transport-checks` is bound to GitHub Actions app ID 15368, with strict
+up-to-date checks. No fake approval or second account is used.
 
-Its only success classification is `PUBLIC_RUNNER_SYNTHETIC_QUALIFIED`. Save the
-actual run ID, attempt, SHA, manifest digest, runner image/kernel/CPU, source
-identity and qualification JSON promptly; artifact retention is one day. A green
-check is engineering evidence only. It never replaces missing private CI checks.
+Environment **r18b4-independent-evaluator** keeps its legacy name for compatibility;
+in V2 it means **Owner-operated approval**. Its only required reviewer is lan01624
+(ID 260238692), prevent-self-review is false, administrator bypass is false, and its
+custom deployment branch policy allows `main` only, no tags. A manual Owner approval
+is still necessary before production starts. Deterministic runtime checks enforce
+this exact Environment meaning, protected main and the required Actions check.
+GitHub's anonymous branch endpoint exposes only the protection summary, so full
+PR/admin/force/delete/strict settings must also be verified using authenticated
+Owner access before authorization. Administrative powers remain; these controls do
+not claim protection against a malicious Owner or GitHub host.
 
-GitHub documents standard public hosted runners as free; availability despite the
-private quota must still be established by an actual run:
-https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job
+After Owner amendment approval and merge, dispatch **synthetic.yml exactly once**
+on the new protected main commit, attempt 1. It uses standard ubuntu-24.04, Python
+3.12.14 and the unchanged frozen PyTorch CPU lock. Four fixed engineering micro-runs
+check numerical replay, pairing, recomputed outputs and actual network/process/
+private-file/TEST-canary denials. Save the one-day artifact and actual provenance.
+V1 success is historical engineering evidence and does not qualify changed V2 bytes.
+No fallback dependencies, weakened sandbox or automatic rerun are allowed.
 
-## Independent evaluator and prospective production
+## Owner-controlled off-host keys and authorization
 
-Do not dispatch `confirmation.yml` in this release. A later separately reviewed
-activation must first update `activation.json`, rebuild the complete manifest,
-obtain Owner publication approval for new bytes, freeze the resulting public
-commit and obtain genuine PI/evaluator approval. Synthetic success alone grants
-no fit authority. No evaluator is appointed by this repository.
+No real key is generated by this amendment. The Owner creates a NEW RSA-3072
+recipient key **off host** and keeps its private half outside GitHub, Codex and the
+Agent. Use two cryptographically distinct off-host Ed25519 keys for PI/evaluator
+roles, both truthfully Owner-controlled. Existing transient test-only keys establish
+no human approval and must never be used for production.
 
-Appoint an independent human distinct from `lan01624`, with a verified GitHub user
-ID and independently exchanged Ed25519 public signing key. The evaluator alone
-generates a NEW RSA-3072 recipient key off host and keeps its private half entirely
-outside GitHub, Codex and the Agent. Never use prior Owner keys. The PI uses a
-distinct off-host Ed25519 signing key. Fixture keys in tests are synthetic only.
-
-Configure Environment `r18b4-independent-evaluator` with only that evaluator as
-required reviewer, prevent self-review, disable administrator bypass, and a custom
-deployment policy allowing branch `main` only (no tags). Protect main separately.
-Review current GitHub protection semantics:
-https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments
-
-The gate reads repository/protection/main metadata anonymously, failing closed if
-GitHub denies those reads or reports a mismatch. The public job's token is passed
-only to one `POST /git/refs` for the fixed public marker. It never accesses the
-private source repository. Administrator control of repository code, settings and
-Environment secrets remains; these controls are not protection from a malicious
-administrator or GitHub host. Off-host key custody protects decryption, while
-independent artifact/signature review determines what evidence is accepted.
-
-The evaluator installs only public trust material in `R18B4_TRUST_JSON`:
+Install only public trust material in Environment secret `R18B4_TRUST_JSON`:
 `pi_signing_public_pem`, `pi_signing_sha256`, `evaluator_signing_public_pem`,
-`evaluator_signing_sha256`, `evaluator_login`, `evaluator_id`,
-`recipient_public_pem`, `recipient_sha256`. Fingerprints are SHA256 of DER
-SubjectPublicKeyInfo. It contains no private key.
+`evaluator_signing_sha256`, `evaluator_login=lan01624`, `evaluator_id=260238692`,
+`recipient_public_pem`, `recipient_sha256`. Fingerprints hash DER SubjectPublicKeyInfo.
 
-`R18B4_SIGNED_AUTHORIZATION` is a strict bundle with `authorization`,
-`pi_signature`, `evaluator_signature`, `reservation`, `reservation_pi_signature`.
-See `validate_authority` in `authorize.py` for the exact versioned schema. Both
-signatures bind canonical UTF-8 sorted compact JSON of the same authorization,
-including actual run ID/attempt, exact public commit/manifest, complete original
-science identity, recipient, signed private reservation digest and <=24h expiry.
-The signed `approval_digest` must equal separate evaluator-controlled Environment
-secret `R18B4_REVIEWER_APPROVAL_SHA256`, the digest of the evaluator's retained
-substantive review. The actual run ID is available while the job waits for
-Environment review; install this run-specific authorization before approving it.
+The `R18B4_SIGNED_AUTHORIZATION` bundle has `authorization`, `pi_signature`,
+`evaluator_signature`, `reservation`, `reservation_pi_signature`. The strict V2
+authorization schema in `authorize.validate_authority` includes `operation`, both
+Owner login/ID fields, `human_review=OWNER_OPERATED`, `independent_human_review=false`,
+`off_host_owner_key_attestation=true`, n=3 acceptance and transport-amendment approval.
+Both role signatures cover the same canonical sorted compact UTF-8 JSON binding
+actual run ID/attempt, exact public commit/manifest/science, recipient, signed private
+reservation digest, Owner review digest and <=24h expiry. An Owner-retained review
+record's SHA256 must equal both signed `approval_digest` and the separately installed
+`R18B4_REVIEWER_APPROVAL_SHA256` Environment secret. Names do not imply a second human.
+No signatures or substantive approval evidence may be invented by the Agent.
 
-The private reservation must already have been signed and committed and the old
-private consumed marker durably claimed, verified by PI and evaluator with their
-ordinary private access. The public job verifies their signed delegation; it
-cannot independently inspect the private repository. The private handoff describes
-the manual reservation procedure. No reservation is created by publishing this code.
+## Separately authorized production sequence
 
-Order: signatures/protections -> exact runtime/TRAIN hashes/synthetic sandbox ->
-atomic public marker -> durable execution/seed-generation records -> CSPRNG three
-fresh blocks excluding all nine historical seeds -> six original fits. Any
-failure, rejected seed, interruption, missing artifact or uncertainty is terminal
-until PI review. Never rerun a production job, replace seeds, reset either marker,
-or select completed blocks. A local failed claim is also permanently recorded.
+Engineering approval does not enable production. A later exact production release
+must separately approve `activation.json` and the rebuilt manifest, freeze its commit,
+and confirm its runtime qualification. Before dispatch, the Owner verifies no old
+execution is queued/running/consumed and creates the separately authorized signed
+private reservation plus old consumed marker by ordinary manual Git. The old marker
+is `refs/tags/r18b4-f03-confirmation-v1-consumed`; the public marker remains
+`refs/tags/r18b4-public-confirmation-v1-consumed`. Neither changes with V2, so the
+amendment cannot reset an already consumed experiment. The public runner cannot
+inspect private Git; it verifies the Owner's signed delegation instead.
 
-All raw receipts, seeds, numerical findings, logs and execution bytes stay in
-evaluator custody. Only AES-256-GCM/RSA-OAEP-SHA256 encrypted custody and a minimal
-opaque receipt leave the job. Fitting runs in the frozen science venv; signing and
-encryption use a separate fixed crypto venv. Artifacts expire in one day. No raw
-output is written to job summaries or logs. Termination may prevent sealing or
-upload; the consumed marker still makes that a terminal lost run.
+Only after those separate approvals, exact activation, fresh keys and reservation:
 
-## Off-host verification and return bridge
+```sh
+gh workflow run confirmation.yml --repo lan01624/f03-confirmation-cpu --ref main
+```
 
-Evaluator downloads the artifact, independently verifies repository ID, commit,
-workflow path/run/attempt, release/protocol/manifest and encrypted file hash using
-GitHub provenance, and supplies those expected values independently of the artifact.
-On their own Linux x86_64 host, use separate exact science and crypto venvs.
-`verify_custody.py decrypt` accepts the recipient private key only OFF HOST and
-checks AEAD, provenance, paths and every custody file hash before extraction.
-Never run that command inside GitHub or give its private-key argument to Codex.
+This is a future command, **do not run during engineering**. The actual run ID is
+available while the Environment waits. The Owner then signs/installs the run-bound
+bundle and review digest before manually approving the Environment. The job checks
+source/authority/protections/runtime/TRAIN hashes/synthetic boundary, atomically
+claims the public marker, durably records execution/seed generation, then draws three
+fresh seed blocks and executes exactly six original fits. Any claim uncertainty,
+partial fit, interruption or missing custody is terminal until PI review. Never
+rerun, reset markers, replace seeds or select only completed blocks.
 
-`verify_custody.py verify` uses the original numerical runtime to check six full
-receipts, split/data hashes, exact runtime bytes, source hashes, all epochs, original
-metrics, paired initialization/order, per-class harms and original t95 df2 result.
-Pass independently obtained public trust to `--external-trust` and the separate
-crypto interpreter to `--crypto-python`; archive-supplied keys are not trusted.
-Its detailed report stays private. The sample size remains three seed blocks on
-the same VALID data, with a conditional normal approximation, no independent-data
-generalization and no automatic scientific admission.
+## Off-host custody and private receipt
 
-After substantive independent quality review the evaluator creates and signs only
-the sanitized receipt accepted by the private `r18b4_public_import.py`. The Owner
-separately verifies/imports it through ordinary manual Git/private PR, without
-private Actions. No public workflow writes to the private repository, and no
-`VALIDATED`, `ADMITTED` or LessonCard transition is automatic.
+The public workflow uses anonymous checkout/read APIs; its token is used only for
+the fixed public marker POST. It never accesses the private repository. Raw receipts,
+seeds, predictions, checkpoints, metrics and logs stay in encrypted Owner custody;
+only AES-256-GCM/RSA-OAEP-SHA256 ciphertext and a minimal opaque receipt leave the job.
+The crypto venv is separate from the exact science venv. Artifacts expire in one day.
 
-## Local engineering checks
+After the batch, Owner downloads the artifact and obtains expected provenance and
+artifact digest directly from GitHub, not by blindly trusting the artifact. On the
+Owner's own Linux x86_64 host with separate exact science/crypto venvs,
+`verify_custody.py decrypt` accepts the RSA private key OFF HOST ONLY and validates
+AEAD, provenance, archive paths and hashes before extraction. Never give that key
+or decrypted custody to Codex. `verify_custody.py verify` checks six complete receipts,
+all epochs, runtime/split/data/source hashes, pairing, recomputed outputs, original
+aggregate and every class harm. Use external pinned public trust with
+`--external-trust` and the crypto interpreter with `--crypto-python`.
 
-Set `PYTHONDONTWRITEBYTECODE=1` to keep generated caches out of the strict inventory.
-Run `python -B -m unittest discover -s tests -p test_static.py` without numerical
-imports, and `python -B -m unittest discover -s tests -p test_security.py` in the
-separate crypto environment. These unit fixtures do not establish hosted Linux
-qualification or independent human review. `qualify.py` intentionally requires
-the real protected public Actions context and frozen runtime.
+The private V2 verification report retains raw scientific results OFF HOST and states
+Owner-operated scope. Owner then performs substantive quality review and signs a
+sanitized `R18B4_PRIVATE_SIGNED_IMPORT_V2` receipt, binding the report SHA256, exact
+provenance/artifact, authenticated Owner role/ID, verdict, complete-six-fit verification
+and explicit quality limitations. Only INVALID_EXECUTION may report incomplete
+verification. All receipts set `independent_human_review=false`, `VALIDATED=false`,
+`lesson_admission=false`; no raw numbers/seeds/free-form outcomes are accepted.
+The private importer verifies signatures and original private science hashes,
+requires externally pinned expected provenance/report digest/verdict, and creates
+only `docs/r18b4_public/imports/run-<id>-attempt-1.json` with exclusive creation.
+It cannot itself recompute protected results from a sanitized receipt; the Owner's
+signed assertion and retained full report supply that accountable evidence.
+
+## Offline tests
+
+Use the pinned crypto environment and `PYTHONDONTWRITEBYTECODE=1`:
+`python -B -m unittest discover -s tests -p 'test_*.py'`.
+These are source/interface/security fixture tests, not real confirmation evidence.

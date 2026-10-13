@@ -1,4 +1,4 @@
-name: Protected once-only confirmation (prospective; disabled)
+name: Owner-operated once-only confirmation V2 (prospective; disabled)
 on:
   workflow_dispatch:
 permissions: {}
@@ -40,7 +40,7 @@ jobs:
           "$RUNNER_TEMP/science/bin/python" -m pip install --no-deps -r frozen/runtime-lock.txt --extra-index-url https://download.pytorch.org/whl/cpu
           python -m venv "$RUNNER_TEMP/crypto"
           "$RUNNER_TEMP/crypto/bin/python" -m pip install --no-deps -r crypto-lock.txt
-      - name: Verify signed authority and independent protection
+      - name: Verify Owner-signed role authority and manual approval protection
         env:
           R18B4_TRUST_JSON: ${{ secrets.R18B4_TRUST_JSON }}
           R18B4_SIGNED_AUTHORIZATION: ${{ secrets.R18B4_SIGNED_AUTHORIZATION }}

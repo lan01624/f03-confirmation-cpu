@@ -1,0 +1,31 @@
+name: Owner transport engineering checks
+on:
+  pull_request:
+    branches: [main]
+permissions: {}
+jobs:
+  owner-transport-checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Anonymous exact proposed merge checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REPOSITORY" == lan01624/f03-confirmation-cpu ]]
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git init .
+          git -c credential.helper= fetch --depth=1 https://github.com/lan01624/f03-confirmation-cpu.git "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - name: Offline source and authorization regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m venv "$RUNNER_TEMP/engineering"
+          "$RUNNER_TEMP/engineering/bin/python" -m pip install --no-deps -r crypto-lock.txt
+          "$RUNNER_TEMP/engineering/bin/python" -B -m unittest discover -s tests -p 'test_*.py'
