@@ -1,0 +1,46 @@
+name: Public runner synthetic qualification
+on:
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: r18b4-public-synthetic
+  cancel-in-progress: false
+jobs:
+  synthetic:
+    if: github.ref == 'refs/heads/main' && github.ref_protected && github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '4'
+      OPENBLAS_NUM_THREADS: '4'
+      MKL_NUM_THREADS: '4'
+    steps:
+      - name: Anonymous public checkout at exact dispatch commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REPOSITORY" == lan01624/f03-confirmation-cpu ]]
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git init .
+          git -c credential.helper= fetch --depth=1 https://github.com/lan01624/f03-confirmation-cpu.git "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.14'
+      - name: Exact isolated scientific runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m venv "$RUNNER_TEMP/science"
+          "$RUNNER_TEMP/science/bin/python" -m pip install --no-deps -r frozen/runtime-lock.txt --extra-index-url https://download.pytorch.org/whl/cpu
+      - name: Source and interface tests
+        run: "$RUNNER_TEMP/science/bin/python -B -m unittest discover -s tests -p 'test_static.py'"
+      - name: Actual synthetic numerical and Linux security qualification
+        run: "$RUNNER_TEMP/science/bin/python -B qualify.py $RUNNER_TEMP/synthetic-qualification.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-synthetic-qualification
+          path: ${{ runner.temp }}/synthetic-qualification.json
+          retention-days: 1
+          if-no-files-found: error

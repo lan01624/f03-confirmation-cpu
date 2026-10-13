@@ -1,0 +1,14 @@
+diff --git a/worker.py b/worker.py
+index bf2e3b36fbfc02721582358de441ae499f92a12c..6b2ee182f6cb1392fb30708ac99a3281946d6408 100644
+--- a/worker.py
++++ b/worker.py
+@@ -50,7 +50,8 @@ def boundary(runtime,site,data,output,canary):
+ def train_only(torch,base,dataset,train,valid,seed,settings,output,epochs=5):
+     torch.manual_seed(seed);model=base._model(torch).to('cpu')
+     initial=base._state_dict_hash(torch,model);loss_fn=torch.nn.CrossEntropyLoss()
+-    optimizer=torch.optim.SGD(model.parameters(),lr=settings['learning_rate'],weight_decay=settings['weight_decay'])
++    # Research patch: add Nesterov momentum to SGD to accelerate optimization for hard classes.
++    optimizer=torch.optim.SGD(model.parameters(),lr=settings['learning_rate'],momentum=0.9,nesterov=True,weight_decay=settings['weight_decay'])
+     loader=base._loader(torch,dataset,train,shuffle=True,seed=seed)
+     validation=base._loader(torch,dataset,valid,shuffle=False,seed=seed)
+     rows=[];updates=0;start=time.monotonic()

@@ -1,0 +1,36 @@
+{
+  "confirmation_spec_id": "r18b4-f03-whole-patch-confirmation-v1",
+  "target_lesson_id": null,
+  "target_estimand_id": "F03_FINAL5_CLASS56_JOINT_OPTIMIZER_DELTA",
+  "required_cells": [
+    {
+      "levels": [
+        {
+          "factor_id": "original_whole_patch",
+          "level": "baseline"
+        }
+      ]
+    },
+    {
+      "levels": [
+        {
+          "factor_id": "original_whole_patch",
+          "level": "candidate"
+        }
+      ]
+    }
+  ],
+  "required_strata": [
+    "same_frozen_F03_50000_TRAIN_10000_VALID"
+  ],
+  "full_fidelity": "CPU; 5 epochs; 3910 updates per fit; original source and candidate bytes; paired init/order",
+  "confirmation_seed_count": 3,
+  "seed_role": "CONFIRMATION",
+  "interval_method": "paired t 95% df=2; conditional normal-seed approximation",
+  "multiple_comparison_rule": "One primary direction test at zero; all secondary and class harms descriptive, not separately confirmed.",
+  "reserved_budget": {
+    "amount": 7200.0,
+    "unit": "wall_seconds"
+  },
+  "failure_handling": "Any failed/uncertain/missing block: stop, no retry, no complete confirmation, null metric for failure."
+}
