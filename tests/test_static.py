@@ -49,7 +49,7 @@ class StaticTests(unittest.TestCase):
         # manual Environment gate remain separately mandatory before execution.
         self.assertEqual(read(ROOT/'activation.json'),{
             'schema':'R18B4_PUBLIC_ACTIVATION_V2',
-            'operation':'SINGLE_OPERATOR_FRESH_SEED_CONFIRMATION_V2',
+            'operation':'R18B4_F03_RECOVERY_CONFIRMATION_V1',
             'status':'PROSPECTIVELY_APPROVED','real_execution_authorized':True})
     def test_synthetic_has_no_real_draw_or_data_download(self):
         tree=ast.parse((ROOT/'qualify.py').read_bytes())

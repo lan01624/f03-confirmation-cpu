@@ -6,7 +6,7 @@ permissions: {}
 jobs:
   owner-transport-checks:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 30
     env:
       PYTHONDONTWRITEBYTECODE: '1'
     steps:
@@ -29,3 +29,19 @@ jobs:
           python -m venv "$RUNNER_TEMP/engineering"
           "$RUNNER_TEMP/engineering/bin/python" -m pip install --no-deps -r crypto-lock.txt
           "$RUNNER_TEMP/engineering/bin/python" -B -m unittest discover -s tests -p 'test_*.py'
+      - name: Frozen science runtime for bounded recovery integration
+        run: |
+          python -m venv "$RUNNER_TEMP/science"
+          "$RUNNER_TEMP/science/bin/python" -m pip install --no-deps -r frozen/runtime-lock.txt --extra-index-url https://download.pytorch.org/whl/cpu
+      - name: One bounded synthetic production-finalization integration
+        env:
+          OMP_NUM_THREADS: '4'
+          OPENBLAS_NUM_THREADS: '4'
+          MKL_NUM_THREADS: '4'
+        run: "$RUNNER_TEMP/science/bin/python -B qualify_recovery.py $RUNNER_TEMP/recovery-integration.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: recovery-engineering-integration
+          path: ${{ runner.temp }}/recovery-integration.json
+          retention-days: 1
+          if-no-files-found: error

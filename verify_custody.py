@@ -8,6 +8,7 @@ import os
 from pathlib import Path, PurePosixPath
 import tarfile
 from transport import *
+from recovery import custody_prior
 
 def decrypt(envelope,destination,private_key,expected_provenance,expected_hash):
     require(not os.environ.get('GITHUB_ACTIONS'),'OFF_HOST_ONLY')
@@ -53,7 +54,8 @@ def verify(custody,train_data,expected_provenance,crypto_python,external_trust):
         capture_output=True,timeout=30,check=False)
     require(p.returncode==0,'OWNER_ROLE_AUTHORITY_SIGNATURES')
     seedraw=regular(custody/'private-seeds.json');manifest=json.loads(seedraw);permit_sha=sha(canonical(permit))
-    stats.validate_seeds(manifest,permit_sha)
+    values=stats.validate_seeds(manifest,permit_sha)
+    require(not set(values)&custody_prior(custody),'PRIOR_CONFIRMATION_SEED_REUSE')
     require(read(custody/'seed-freeze.json')=={'sha256':sha(seedraw),'count':3,'role':'CONFIRMATION'},'SEED_COMMITMENT')
     require(not list(custody.glob('*-FAILED.json')) and not (custody/'BATCH_STOP.json').exists(),'TERMINAL_FAILURE')
     expected_pairs=[b+'-'+a for b in BLOCKS for a in ARMS]

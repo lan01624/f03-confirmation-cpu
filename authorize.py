@@ -8,6 +8,7 @@ import urllib.error
 import urllib.request
 from transport import *
 from crypto import signature_verify,recipient,fingerprint
+from recovery import binding,protocol,prior_seeds,custody_prior
 
 ENVIRONMENT='r18b4-independent-evaluator'
 
@@ -16,9 +17,9 @@ def validate_authority(bundle,trust,context,identity,now):
     auth=bundle['authorization'];reservation=bundle['reservation']
     expected={'schema','provenance','science','evaluator_login','evaluator_id','owner_login','recipient_sha256',
         'reservation_sha256','expires_unix','approval_digest','accepts_n3_limit','off_host_owner_key_attestation','transport_amendment_approved',
-        'operation','owner_id','human_review','independent_human_review'}
+        'operation','owner_id','human_review','independent_human_review','recovery'}
     require(set(auth)==expected,'AUTHORIZATION_FIELDS')
-    require(auth['schema']=='R18B4_PUBLIC_AUTHORIZATION_V2' and auth['operation']==OPERATION and
+    require(auth['schema']=='R18B4_RECOVERY_AUTHORIZATION_V1' and auth['operation']==OPERATION and
         auth['provenance']==context and auth['science']==identity,'SIGNED_RUN_SCIENCE_BINDING')
     require(auth['owner_login']==auth['evaluator_login']==trust['evaluator_login']==OWNER_LOGIN,'SOLE_OWNER_REQUIRED')
     require(type(auth['owner_id']) is int and type(auth['evaluator_id']) is int and type(trust['evaluator_id']) is int and
@@ -33,19 +34,21 @@ def validate_authority(bundle,trust,context,identity,now):
     recipient(trust['recipient_public_pem'].encode(),auth['recipient_sha256'])
     require(auth['reservation_sha256']==sha(canonical(reservation)),'RESERVATION_BINDING')
     signature_verify(reservation,bundle['reservation_pi_signature'],trust['pi_signing_public_pem'].encode())
-    require(set(reservation)=={'schema','science','public_repository_id','public_commit','old_marker','old_marker_commit','private_delegation_commit','status'},'RESERVATION_FIELDS')
-    require(reservation['schema']=='R18B4_PRIVATE_DELEGATION_V1' and reservation['status']=='OLD_ROUTE_RESERVED_NO_FITS' and
+    require(set(reservation)=={'schema','science','public_repository_id','public_commit','old_marker','old_marker_commit','private_delegation_commit','status','recovery'},'RESERVATION_FIELDS')
+    require(reservation['schema']=='R18B4_RECOVERY_RESERVATION_V1' and reservation['status']=='RECOVERY_ROUTE_RESERVED_NO_FITS' and
         reservation['science']==identity and reservation['public_repository_id']==REPOSITORY_ID and
-        reservation['public_commit']==context['commit'] and reservation['old_marker']=='refs/tags/r18b4-f03-confirmation-v1-consumed','PRIVATE_ROUTE_NOT_RESERVED')
+        reservation['public_commit']==context['commit'] and reservation['old_marker']==protocol()['recovery_private_marker'],'PRIVATE_ROUTE_NOT_RESERVED')
     for k in ('old_marker_commit','private_delegation_commit'):
         require(bool(re.fullmatch('[0-9a-f]{40}',reservation[k])),'PRIVATE_RESERVATION_COMMIT')
     require(bool(re.fullmatch('[0-9a-f]{64}',auth['approval_digest'])),'REVIEWER_DIGEST')
+    require(auth['provenance']['workflow']==WORKFLOW and auth['recovery']==reservation['recovery']==binding(auth['recovery']['prior_seed_manifest_sha256']),'RECOVERY_AUTHORITY_BINDING')
     return auth
 
 def api(method,path,body=None,token=None):
     # Private repository endpoints cannot be expressed. Token only for this marker.
     allowed_reads={'','/git/ref/heads/main','/branches/main','/environments/'+ENVIRONMENT,
-        '/environments/'+ENVIRONMENT+'/deployment-branch-policies','/git/ref/'+MARKER[5:]}
+        '/environments/'+ENVIRONMENT+'/deployment-branch-policies','/git/ref/'+MARKER[5:],
+        '/git/ref/'+protocol()['original_public_marker'][5:]}
     require((method=='GET' and path in allowed_reads and token is None) or
         (method=='POST' and path=='/git/refs' and body=={'ref':MARKER,'sha':os.environ['GITHUB_SHA']} and bool(token)),'API_SCOPE_DENIED')
     headers={'Accept':'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28'}
@@ -77,7 +80,7 @@ def protections(auth):
     return {'environment':env,'branch_policies':policy,'branch':branch}
 
 def prepare(private,trust_path):
-    identity=freeze();context=hosted_context('confirmation.yml');activation=read(ROOT/'activation.json')
+    identity=freeze();context=hosted_context(WORKFLOW);activation=read(ROOT/'activation.json')
     require(activation['schema']=='R18B4_PUBLIC_ACTIVATION_V2' and activation['operation']==OPERATION and
         activation['real_execution_authorized'] is True and activation['status']=='PROSPECTIVELY_APPROVED','PRODUCTION_DISABLED')
     require(os.environ.get('GITHUB_ACTOR')==OWNER_LOGIN and os.environ.get('GITHUB_TRIGGERING_ACTOR')==OWNER_LOGIN and
@@ -88,16 +91,21 @@ def prepare(private,trust_path):
     require(hmac.compare_digest(auth['approval_digest'],os.environ.get('R18B4_REVIEWER_APPROVAL_SHA256','')),'OWNER_REVIEW_DIGEST')
     require(not private.exists() and not private.resolve().is_relative_to(ROOT) and not ROOT.is_relative_to(private.resolve()),'FRESH_EXTERNAL_CUSTODY')
     proof=protections(auth)
+    prior_raw=os.environ['R18B4_PRIOR_SEED_MANIFEST'].encode()
+    prior_seeds(prior_raw,auth['recovery']['prior_seed_manifest_sha256'])
+    require(api('GET','/git/ref/'+protocol()['original_public_marker'][5:])['object']['sha']==protocol()['original_run']['commit'],'ORIGINAL_MARKER_PRESERVED')
     private.mkdir(mode=0o700);custody=private/'custody';custody.mkdir(mode=0o700)
+    with (custody/'prior-confirmation-seeds.json').open('xb') as f:f.write(prior_raw);f.flush();os.fsync(f.fileno())
     durable(custody/'authority.json',bundle);durable(custody/'trust.json',trust);durable(custody/'protections.json',proof)
     durable(custody/'permit.json',{'schema':'R18B4_PUBLIC_PERMIT_V1','provenance':context,'science':identity,
         'authorization_sha256':sha(canonical(bundle)),'recipient_sha256':auth['recipient_sha256'],'marker':MARKER,
         'run_seconds':900,'batch_seconds':7200,'attempt':1,'retries':0})
 
 def claim(private):
-    identity=freeze();context=hosted_context('confirmation.yml');custody=private/'custody'
+    identity=freeze();context=hosted_context(WORKFLOW);custody=private/'custody'
     bundle=read(custody/'authority.json');trust=read(custody/'trust.json')
     auth=validate_authority(bundle,trust,context,identity,time.time());protections(auth)
+    custody_prior(custody)
     # Local durable claim-started makes even a lost HTTP response terminal.
     durable(custody/'claim-started.json',{'status':'CLAIM_STARTED_NO_RETRY','provenance':context})
     result=api('POST','/git/refs',{'ref':MARKER,'sha':context['commit']},os.environ['GITHUB_TOKEN'])
