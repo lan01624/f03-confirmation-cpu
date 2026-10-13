@@ -1,4 +1,4 @@
-"""Off-host independent verifier. Never prints seeds or numerical outcomes."""
+"""Off-host Owner-operated verifier. Never prints seeds or numerical outcomes."""
 import argparse
 import base64
 import io
@@ -51,7 +51,7 @@ def verify(custody,train_data,expected_provenance,crypto_python,external_trust):
     # External pinned public signing keys, never trust the archive's own key claim.
     p=subprocess.run([str(crypto_python),'-B',str(ROOT/'authorize.py'),'audit-authority','--private',str(custody),'--trust',str(external_trust)],
         capture_output=True,timeout=30,check=False)
-    require(p.returncode==0,'INDEPENDENT_AUTHORITY_SIGNATURES')
+    require(p.returncode==0,'OWNER_ROLE_AUTHORITY_SIGNATURES')
     seedraw=regular(custody/'private-seeds.json');manifest=json.loads(seedraw);permit_sha=sha(canonical(permit))
     stats.validate_seeds(manifest,permit_sha)
     require(read(custody/'seed-freeze.json')=={'sha256':sha(seedraw),'count':3,'role':'CONFIRMATION'},'SEED_COMMITMENT')
@@ -70,7 +70,7 @@ def verify(custody,train_data,expected_provenance,crypto_python,external_trust):
     for block,seed in manifest['blocks'].items():
         for arm in ARMS:
             key=block+'-'+arm;out=custody/'fits'/key;r=read(out/'result.json');row=read(custody/(key+'-RESULT.json'))
-            # Seal omits empty scratch. Add no files during independent verification.
+            # Seal omits empty scratch. Add no files during off-host verification.
             names={'result.json','checkpoint.pt','private-worker.log'}|{f'validation-{k}-epoch{i}.{ext}' for i in range(1,6) for k,ext in [('logits','npy'),('predictions','json')]}
             require({p.name for p in out.iterdir()}==names and set(row['artifacts'])==names,'FULL_RECEIPT_INVENTORY')
             for name,digest in row['artifacts'].items():require(sha(regular(out/name))==digest,'RECEIPT_HASH')
@@ -98,8 +98,11 @@ def verify(custody,train_data,expected_provenance,crypto_python,external_trust):
             if arm=='baseline':require(m['accuracy']>.1 and m['cross_entropy']<math.log(10) and r['epochs'][-1]['train_loss']<r['epochs'][0]['train_loss'],'BASELINE_VERIFIED')
             rows.append(row)
     result=stats.aggregate(rows);require(result==read(custody/'CONFIRMATION_RESULT.json'),'ORIGINAL_PAIRED_T95_AND_HARMS')
-    return {'schema':'R18B4_PRIVATE_VERIFICATION_V1','status':'VERIFIED_PENDING_INDEPENDENT_HUMAN_SCIENTIFIC_REVIEW',
-        'provenance':expected_provenance,'scientific_result':result,'independent_data':False,'lesson_admission':False,'VALIDATED':False}
+    return {'schema':'R18B4_PRIVATE_VERIFICATION_V2','operation':OPERATION,
+        'status':'COMPLETE_SIX_FITS_VERIFIED_PENDING_OWNER_QUALITY_REVIEW',
+        'provenance':expected_provenance,'scientific_result':result,'complete_six_receipt_verification':True,
+        'human_review':'OWNER_OPERATED','independent_human_review':False,
+        'quality_limitations':QUALITY_LIMITATIONS,'independent_data':False,'lesson_admission':False,'VALIDATED':False}
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('phase',choices=('decrypt','verify'));p.add_argument('--custody',type=Path,required=True)
