@@ -67,3 +67,17 @@ class FinalizationTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError,'fixture worker failure'):self.batch(p,'nonempty',True,True)
             self.assertEqual(read(p/'custody/block-01-baseline-FAILED.json')['exception_type'],'RuntimeError')
             self.assertTrue((p/'custody/block-01-baseline-CLEANUP-FAILED.json').exists())
+
+class ReplayTests(unittest.TestCase):
+    def test_wall_clock_is_not_numerical_state(self):
+        from qualify_recovery import verify_replay
+        import copy
+        first={'initial_state_sha256':'initial','state_sha256':'final',
+            'epochs':[{'train_order_sha256':'order','train_loss':1.,'train_online_accuracy':.5}],
+            'final_validation':{'evaluation_seconds':.1,'logits_sha256':'logits','accuracy':.5}}
+        second=copy.deepcopy(first);second['final_validation']['evaluation_seconds']=.2
+        verify_replay(first,second)
+        second['final_validation']['accuracy']=.6
+        with self.assertRaises(ValueError):verify_replay(first,second)
+        second=copy.deepcopy(first);second['state_sha256']='different'
+        with self.assertRaises(ValueError):verify_replay(first,second)
